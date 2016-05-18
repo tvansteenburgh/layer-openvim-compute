@@ -1,17 +1,11 @@
 from charms.reactive import when, when_not, set_state
+from charmhelpers.core.hookenv import status_set
 
+import subprocess
 
-@when_not('openvim.installed')
-def install_openvim():
-    # Do your setup here.
-    #
-    # If your charm has other dependencies before it can install,
-    # add those as @when() clauses above., or as additional @when()
-    # decorated handlers below
-    #
-    # See the following for information about reactive charms:
-    #
-    #  * https://jujucharms.com/docs/devel/developer-getting-started
-    #  * https://github.com/juju-solutions/layer-basic#overview
-    #
-    set_state('openvim.installed')
+@when_not('openvim-compute.installed')
+def prepare_for_openvim_compute():
+    status_set("maintenance", "preparing compute node")
+    subprocess.check_call("usermod -aG libvirtd ubuntu".split())
+    set_state('openvim-compute.installed')
+    status_set("active", "openvim compute is prepared - needs manual connection")
