@@ -1,5 +1,6 @@
 includes:
   - 'layer:basic'
+  - 'interface:openvim-compute'
 options:
   basic:
     packages:

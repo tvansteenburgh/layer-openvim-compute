@@ -11,3 +11,6 @@ tags:
 extra-bindings:
   public:
   internal:
+provides:
+  compute:
+    interface: openvim-compute
