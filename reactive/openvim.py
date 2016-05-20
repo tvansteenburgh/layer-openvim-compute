@@ -10,6 +10,8 @@ def prepare_for_openvim_compute():
     status_set("maintenance", "preparing compute node")
     subprocess.check_call("usermod -aG libvirtd ubuntu".split())
     status_set("active", "openvim compute is prepared - needs manual connection")
+    mkdir('/usr/libexec', owner=root, group=root, perms=0o777, force=False)
+    symlink('/usr/bin/kvm', '/usr/libexec/qemu-kvm')
     mkdir('/opt/VNF', owner='ubuntu', group='ubuntu', perms=0o777, force=False)
     symlink('/var/lib/libvirt/images', '/opt/VNF/images')
     chownr('/opt/VNF', owner='ubuntu', group='ubuntu', follow_links=False, chowntopdir=True)
