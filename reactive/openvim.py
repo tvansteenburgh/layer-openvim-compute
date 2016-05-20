@@ -16,7 +16,6 @@ def prepare_for_openvim_compute():
     chownr('/var/lib/libvirt/images', owner='root', group='ubuntu', follow_links=False, chowntopdir=True)
     subprocess.check_call('chmod g+rwx /var/lib/libvirt/images', shell=True)
     subprocess.check_call('wget https://cloud-images.ubuntu.com/releases/16.04/release/ubuntu-16.04-server-cloudimg-amd64-disk1.img -O /opt/VNF/images/ubuntu-16.04-server-cloudimg-amd64-disk1.img', shell=True)
-    subprocess.check_call('virsh net-start default', shell=True)
     set_state('openvim-compute.installed')
     
 @when('compute.available', 'openvim-compute.installed')
