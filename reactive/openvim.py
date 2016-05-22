@@ -4,10 +4,26 @@ from charmhelpers.core.hookenv import status_set
 from charmhelpers.core.unitdata import kv
 from charmhelpers.core.host import mkdir, symlink, chownr, add_user_to_group
 from charmhelpers.fetch.archiveurl import ArchiveUrlFetchHandler
+from charmhelpers.contrib.unison import ensure_user
 
-def add_user_to_libvirt_group():
-    status_set("maintenance", "adding user to libvirtd group")
-    add_user_to_group("ubuntu", "libvirtd")
+def create_openvim_user():
+    status_set("maintenance", "creating openvim user")
+    ensure_user('openvim')
+
+def group_openvim_user():
+    status_set("maintenance", "adding openvim user to groups")
+    add_user_to_group('openvim', 'libvirtd')
+    add_user_to_group('openvim', 'sudo')
+
+def nopasswd_openvim_sudo():
+    status_set("maintenance", "allowing nopasswd sudo for openvim user")
+    with open('/etc/sudoers', 'r+') as f:
+        data = f.read()
+        if 'openvim ALL=(ALL) NOPASSWD:ALL' not in data:
+            f.seek(0)
+            f.truncate()
+            data += '\nopenvim ALL=(ALL) NOPASSWD:ALL\n'
+            f.write(data)
 
 def setup_qemu_binary():
     status_set("maintenance", "setting up qemu-kvm binary")
@@ -16,10 +32,10 @@ def setup_qemu_binary():
 
 def setup_images_folder():
     status_set("maintenance", "setting up VM images folder")
-    mkdir('/opt/VNF', owner='ubuntu', group='ubuntu', perms=0o775, force=False)
+    mkdir('/opt/VNF', owner='openvim', group='openvim', perms=0o775, force=False)
     symlink('/var/lib/libvirt/images', '/opt/VNF/images')
-    chownr('/opt/VNF', owner='ubuntu', group='ubuntu', follow_links=False, chowntopdir=True)
-    chownr('/var/lib/libvirt/images', owner='root', group='ubuntu', follow_links=False, chowntopdir=True)
+    chownr('/opt/VNF', owner='openvim', group='openvim', follow_links=False, chowntopdir=True)
+    chownr('/var/lib/libvirt/images', owner='root', group='openvim', follow_links=False, chowntopdir=True)
     chmod('/var/lib/libvirt/images', 0o775)
 
 def download_default_image():
@@ -32,8 +48,10 @@ def download_default_image():
     )
 
 @when_not('openvim-compute.installed')
-def prepare_for_openvim_compute():
-    add_user_to_libvirt_group()
+def prepare_openvim_compute():
+    create_openvim_user()
+    group_openvim_user()
+    nopasswd_openvim_sudo()
     setup_qemu_binary()
     setup_images_folder()
     download_default_image()
@@ -45,11 +63,12 @@ def install_ssh_key(compute):
     cache = kv()
     if cache.get("ssh_key:" + compute.ssh_key()):
         return
-    with open("/home/ubuntu/.ssh/authorized_keys", 'a') as f:
+    mkdir('/home/openvim/.ssh', owner='openvim', group='openvim', perms=0o775)
+    with open("/home/openvim/.ssh/authorized_keys", 'a') as f:
         f.write(compute.ssh_key() + '\n')
     compute.ssh_key_installed()
     cache.set("ssh_key:" + compute.ssh_key(), True)
 
 @when('compute.connected')
 def send_user(compute):
-    compute.send_user('ubuntu')
+    compute.send_user('openvim')
