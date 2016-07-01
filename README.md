@@ -1,6 +1,6 @@
 # Overview
 
-Launches an openvim controller.
+Launches an OpenVIM compute node.
 
 # Preparation
 
@@ -31,8 +31,8 @@ change it to:
     juju deploy mysql
     juju deploy openvim-controller
     juju deploy openvim-compute
-    juju add-relation mysql openvim-controller
-    juju add-relation openvim-compute openvim-controller
+    juju relate mysql openvim-controller
+    juju relate openvim-compute openvim-controller
     
 # Creating and starting a VM
 
@@ -41,7 +41,7 @@ and networks, but you'll want to add your own VM when you're ready to deploy.
 This charm generates a basic VM yaml definition for you if you'd like to launch
 one quickly. First, ssh into your openvim-controller box:
 
-    juju ssh openvim-contrller/0 # may not be zero, find instance id with `juju status`.
+    juju ssh openvim-controller/0 # may not be zero, find instance id with `juju status`.
 
 Then create your VM and get its uuid:
 
