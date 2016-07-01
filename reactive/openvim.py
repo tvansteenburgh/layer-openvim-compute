@@ -7,16 +7,16 @@ from charmhelpers.fetch.archiveurl import ArchiveUrlFetchHandler
 from charmhelpers.contrib.unison import ensure_user
 
 def create_openvim_user():
-    status_set("maintenance", "creating openvim user")
+    status_set("maintenance", "Creating OpenVIM user")
     ensure_user('openvim')
 
 def group_openvim_user():
-    status_set("maintenance", "adding openvim user to groups")
+    status_set("maintenance", "Adding OpenVIM user to groups")
     add_user_to_group('openvim', 'libvirtd')
     add_user_to_group('openvim', 'sudo')
 
 def nopasswd_openvim_sudo():
-    status_set("maintenance", "allowing nopasswd sudo for openvim user")
+    status_set("maintenance", "Allowing nopasswd sudo for OpenVIM user")
     with open('/etc/sudoers', 'r+') as f:
         data = f.read()
         if 'openvim ALL=(ALL) NOPASSWD:ALL' not in data:
@@ -26,12 +26,12 @@ def nopasswd_openvim_sudo():
             f.write(data)
 
 def setup_qemu_binary():
-    status_set("maintenance", "setting up qemu-kvm binary")
+    status_set("maintenance", "Setting up qemu-kvm binary")
     mkdir('/usr/libexec', owner='root', group='root', perms=0o775, force=False)
     symlink('/usr/bin/kvm', '/usr/libexec/qemu-kvm')
 
 def setup_images_folder():
-    status_set("maintenance", "setting up VM images folder")
+    status_set("maintenance", "Setting up VM images folder")
     mkdir('/opt/VNF', owner='openvim', group='openvim', perms=0o775, force=False)
     symlink('/var/lib/libvirt/images', '/opt/VNF/images')
     chownr('/opt/VNF', owner='openvim', group='openvim', follow_links=False, chowntopdir=True)
@@ -39,7 +39,7 @@ def setup_images_folder():
     chmod('/var/lib/libvirt/images', 0o775)
 
 def download_default_image():
-    status_set("maintenance", "downloading default image")
+    status_set("maintenance", "Downloading default image")
     fetcher = ArchiveUrlFetchHandler()
     fetcher.download(
         source="https://cloud-images.ubuntu.com/releases/16.04/release/ubuntu-16.04-server-cloudimg-amd64-disk1.img",
@@ -55,7 +55,7 @@ def prepare_openvim_compute():
     setup_qemu_binary()
     setup_images_folder()
     download_default_image()
-    status_set("active", "ready")
+    status_set("active", "Ready")
     set_state('openvim-compute.installed')
 
 @when('compute.available', 'openvim-compute.installed')
