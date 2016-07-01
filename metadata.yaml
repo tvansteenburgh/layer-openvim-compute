@@ -9,6 +9,8 @@ tags:
   - nfv
   - telco
   - osm
+series:
+  - xenial
 extra-bindings:
   public:
   internal:
